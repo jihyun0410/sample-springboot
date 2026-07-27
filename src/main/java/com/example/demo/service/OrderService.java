@@ -7,9 +7,14 @@ import org.springframework.stereotype.Service;
 public class OrderService {
 
     /**
-     * Calculates the total price for an order (baseline behavior).
+     * Calculates the total price for an order.
+     * Now applies a 10% bulk discount when quantity exceeds 10.
      */
     public double calculateTotal(Order order) {
-        return order.getQuantity() * order.getUnitPrice();
+        double subtotal = order.getQuantity() * order.getUnitPrice();
+        if (order.getQuantity() > 10) {
+            return subtotal * 0.9;
+        }
+        return subtotal;
     }
 }
