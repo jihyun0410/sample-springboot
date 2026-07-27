@@ -1,0 +1,22 @@
+package com.example.demo;
+
+import com.example.demo.model.Order;
+import com.example.demo.service.OrderService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+// NOTE: This file is consumed by `codetest test`. The agent ensures it is
+// annotated with @SpringBootTest before executing it.
+class ProvidedOrderTest {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Test
+    void totalIsQuantityTimesUnitPrice() {
+        Order order = new Order("A1", 3, 10.0);
+        assertEquals(30.0, orderService.calculateTotal(order));
+    }
+}
