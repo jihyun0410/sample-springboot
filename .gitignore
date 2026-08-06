@@ -2,3 +2,5 @@
 build/
 .codetest/
 !src/test/java/
+# AI Agent Virtual Environment
+.ai_env/
