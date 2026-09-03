@@ -8,8 +8,9 @@
 
       1. 파이썬 확인 (py -3 → python → python3)
       2. .ai_env 가상환경 생성 (최초 1회)
-      3. GitHub 에서 codetest CLI 설치/최신화
-      4. (선택) MCP 주소·API Key 를 .codetest/config.json 에 저장
+      3. 빌드 도구·런타임 라이브러리 설치 (setuptools, wheel, typer, httpx)
+      4. GitHub 에서 codetest CLI 설치/최신화
+      5. (선택) MCP 주소·API Key 를 .codetest/config.json 에 저장
 
     실행은 하지 않는다 — 환경만 만들고 사용자가 CLI 에서 직접 명령을 입력한다.
 
@@ -48,6 +49,12 @@ $ErrorActionPreference = "Stop"
 # 가상환경이 생성될 숨김 폴더 이름
 $VenvDir = ".ai_env"
 $PackageUrl = "git+https://github.com/jihyun0410/codereview_gitver.git"
+
+# CLI 설치 전에 먼저 깔아야 하는 라이브러리
+#   setuptools / wheel : codereview_gitver 는 setup.py 로 빌드된다. git+ 로 받으면
+#                        소스에서 빌드하므로 빌드 도구가 먼저 있어야 한다.
+#   typer / httpx      : CLI 런타임 의존성 (명령어 인터페이스 · MCP 호출)
+$Libraries = @("setuptools", "wheel", "typer", "httpx")
 
 # 어느 위치에서 실행하든 프로젝트 루트(이 스크립트가 있는 폴더)를 기준으로 한다
 Set-Location -LiteralPath $PSScriptRoot
@@ -118,7 +125,16 @@ $PipExe = Join-Path $BinDir "pip"
 $ActivateScript = Join-Path $BinDir "Activate.ps1"
 $CodetestExe = Join-Path $BinDir "codetest"
 
-# --- 4. GitHub에서 Agent 라이브러리 설치 및 최신화 -------------------------------
+# --- 4. 빌드 도구 + 런타임 라이브러리 설치 ---------------------------------------
+Write-Host ("필요한 라이브러리를 설치합니다: {0}" -f ($Libraries -join ", "))
+& $PipExe install --quiet --upgrade @Libraries
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Error: 라이브러리 설치에 실패했습니다." -ForegroundColor Red
+    Write-Host "  사내망/프록시 환경이라면 HTTPS_PROXY / PIP_INDEX_URL 설정을 확인하세요."
+    exit 1
+}
+
+# --- 5. GitHub에서 Agent 라이브러리 설치 및 최신화 -------------------------------
 Write-Host "GitHub에서 최신 AI Agent 라이브러리를 동기화합니다..."
 & $PipExe install --quiet --upgrade $PackageUrl
 if ($LASTEXITCODE -ne 0) {
@@ -127,7 +143,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# --- 5. (선택) 접속 정보를 저장소별 설정에 남긴다 --------------------------------
+# --- 6. (선택) 접속 정보를 저장소별 설정에 남긴다 --------------------------------
 if ($ServerUrl -or $ApiKey) {
     $ConfigPath = Join-Path ".codetest" "config.json"
     New-Item -ItemType Directory -Path ".codetest" -Force | Out-Null
@@ -147,7 +163,7 @@ if ($ServerUrl -or $ApiKey) {
     Write-Host "접속 정보를 저장했습니다: $ConfigPath"
 }
 
-# --- 6. 환경 구성 완료 — 실행은 사용자가 CLI에서 직접 입력한다 -------------------
+# --- 7. 환경 구성 완료 — 실행은 사용자가 CLI에서 직접 입력한다 -------------------
 Write-Host "========================================="
 Write-Host "환경 구성 완료. 아래 명령을 직접 입력하세요."
 Write-Host ""
