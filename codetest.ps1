@@ -159,7 +159,13 @@ if ($ServerUrl -or $ApiKey) {
     if ($ServerUrl) { $config["server_url"] = $ServerUrl }
     if ($ApiKey) { $config["api_key"] = $ApiKey }
 
-    $config | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $ConfigPath -Encoding UTF8
+    # BOM 없는 UTF-8 로 저장한다.
+    # Windows PowerShell 5.1 의 `Set-Content -Encoding UTF8` 은 BOM 을 붙이는데,
+    # CLI(Python)가 이 파일을 읽다 BOM 에 걸리면 설정을 통째로 잃어
+    # project_id 가 있는데도 "등록된 프로젝트가 없습니다" 로 잘못 안내한다.
+    $json = $config | ConvertTo-Json -Depth 5
+    $fullPath = Join-Path (Get-Location).Path $ConfigPath
+    [System.IO.File]::WriteAllText($fullPath, $json, (New-Object System.Text.UTF8Encoding $false))
     Write-Host "접속 정보를 저장했습니다: $ConfigPath"
 }
 
