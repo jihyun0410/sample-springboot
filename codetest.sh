@@ -40,8 +40,11 @@ echo "========================================="
 echo "환경 구성 완료. 아래 명령을 직접 입력하세요."
 echo
 echo "  source $BIN_DIR/activate"
-echo "  codetest project register --token <GitHub_API_Token>   # 최초 1회"
-echo "  codetest run --stage"
+echo "  codetest project register       # 최초 1회"
+echo "  codetest generate               # Test Code 생성만"
+echo "  codetest run --stage            # 생성 + 실행 + report"
 echo
 echo "활성화 없이 바로 쓰려면: $BIN_DIR/codetest run --stage"
+echo
+echo "IntelliJ PowerShell 터미널에서는 codetest.ps1 을 쓰세요."
 echo "========================================="
