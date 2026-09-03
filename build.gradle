@@ -40,5 +40,13 @@ tasks.register("aiTest", Exec) {
     group = "build setup"
     description = "CodeTest AI Agent 실행 환경 구성 (실행은 CLI에서 직접)"
 
-    commandLine 'bash', './codetest.sh'
+    // IntelliJ 의 Gradle 창에서 눌러도 OS 에 맞는 스크립트가 돌게 한다.
+    //   Windows → codetest.ps1 (PowerShell), 그 외 → codetest.sh (bash)
+    // 터미널에서 직접 돌릴 때도 같은 스크립트를 쓰면 된다.
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+                    '-File', './codetest.ps1'
+    } else {
+        commandLine 'bash', './codetest.sh'
+    }
 }
